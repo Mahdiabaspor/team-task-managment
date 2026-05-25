@@ -1,3 +1,5 @@
+"use client"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { Project } from "@/app/generated/prisma/client"
@@ -9,29 +11,39 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { getAvatarNumber } from "@/lib/utils"
+import { getAvatarNumber, isProjectOwnerWithSession } from "@/lib/utils"
 
-export function CardImage({Project}:{Project:Project}) {
+import { useSession } from "next-auth/react"
+import { Users } from "lucide-react"
+
+export  function CardImage({ project, membersCount }: { project: Project; membersCount: number }) {
+  const { data } = useSession()
+  const hasAccess =  isProjectOwnerWithSession(project.ownerId, data)
   return (
-    <Card className="relative mx-auto w-full max-w-sm pt-0">
-      <div className="absolute inset-0 z-30 aspect-video bg-black/5" />
+    <Card className="shrink-0 relative  w-full max-w-sm pt-0 group ma">
+      <div className="absolute inset-0 z-1- aspect-video bg-black/5" />
       <img
-        src={`/cards/${getAvatarNumber(Project.id)}.svg`}
+        src={`/cards/${getAvatarNumber(project.id)}.svg`}
         alt="Event cover"
-        className="relative z-60 aspect-video w-full p-5   "
+        className="relative z-20 aspect-video w-full p-5 group-hover:scale-105 transition-all duration-700   "
       />
       <CardHeader>
-        <CardAction>
-          <Badge variant="secondary">Featured</Badge>
+        <CardAction className=" flex  gap-2">
+          <Badge className="hidden sm:flex " variant={hasAccess ? "default" : "secondary"}>
+            {hasAccess ? "Your project" : "Partner project"}
+          </Badge>
+
+          <Badge className="hidden sm:flex " variant="outline">
+            {membersCount} <Users/>
+          </Badge>
         </CardAction>
-        <CardTitle>Design systems meetup</CardTitle>
+        <CardTitle>{project.name}</CardTitle>
         <CardDescription>
-          A practical talk on component APIs, accessibility, and shipping
-          faster.
+          One board for everything,no task left behind. From backlog to done,
         </CardDescription>
       </CardHeader>
       <CardFooter>
-        <Button className="w-full">View Event</Button>
+        <Button variant={"default"} className="w-full">View Project</Button>
       </CardFooter>
     </Card>
   )

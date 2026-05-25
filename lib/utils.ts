@@ -17,8 +17,10 @@ export function getAvatarNumber(id: string): number {
 }
 
 
-export async function isProjectOwner(projectOwnerId: string): Promise<boolean> {
-  const session = await auth()
+
+
+
+export  function isProjectOwnerWithSession(projectOwnerId: string, session: any): boolean {
   if(session?.user) {
     const userId = session.user.id
     // Assuming you have a function to fetch project details by ID

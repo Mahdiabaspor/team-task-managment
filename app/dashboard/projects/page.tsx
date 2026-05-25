@@ -19,10 +19,13 @@ export default async function Home() {
   const projects = await prisma.project.findMany({
     where: {
       owner: { email: { equals: session.user.email } }
+    },
+    include: {
+      members: true,
     }
   })
   return (
-    <div className="min-h-screen -50 flex flex-col items-center justify-center -mt-16">
+    <div className="h-screen flex flex-col items-center justify-center ">
       {
         projects.length === 0 ? (
           <>
@@ -38,14 +41,11 @@ export default async function Home() {
             </NewProjectDialog>
           </>
         ) : (
-          <>
-          {projects.map((p)=>(
-            <CardImage Project={p}/>
-          ))}
-          
-          
-          
-          </>
+          <div className="flex flex-wrap gap-5 px-10 items-start justify-center mt-17 h-full">
+            {projects.map((p) => (
+              <CardImage key={p.id} project={p} membersCount={p.members.length} />
+            ))}
+          </div>
         )
       }
 
