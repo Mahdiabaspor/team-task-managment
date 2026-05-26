@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { sessionCheck } from "./session-cheker"
+import { Task } from "../generated/prisma/client"
 
 export async function createTask(
   title: string,
@@ -73,3 +74,36 @@ export async function moveTask(taskId: string, containerId: string) {
   return EditedTask
 
 }
+
+
+
+
+export async function editTask(taskId: string, payload: Task) {
+    if (!taskId) {
+        throw new Error("Task title cannot be empty")
+
+    }
+    await sessionCheck()
+    const editedTask = await prisma.task.update({
+        where: { id: taskId },
+        data: payload
+    })
+    revalidatePath("/")
+    return editedTask
+}
+
+
+export async function deleteTask(TaskId: string) {
+    if (!TaskId ) {
+        throw new Error("Task id cannot be empty")
+    }
+    await sessionCheck()
+    const deletedTask = await prisma.task.delete({
+        where: { id: TaskId },
+
+    })
+    revalidatePath("/")
+    return deletedTask
+}
+
+

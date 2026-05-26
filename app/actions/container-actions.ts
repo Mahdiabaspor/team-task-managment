@@ -30,3 +30,37 @@ export async function createContainer(name: string, projectId: string) {
     revalidatePath("/")
     return result
 }
+
+
+
+export async function editContainerName(title: string, containerId: string) {
+    if (!title || title.trim() === "") {
+        throw new Error("Container title cannot be empty")
+
+    }
+    await sessionCheck()
+    const editedContainer = await prisma.container.update({
+        where: { id: containerId },
+        data: {
+            title: title
+        }
+    })
+    revalidatePath("/")
+    return editedContainer
+}
+
+
+export async function deleteContainer(containerId: string) {
+    if (!containerId ) {
+        throw new Error("Container id cannot be empty")
+    }
+    await sessionCheck()
+    const deletedContainer = await prisma.container.delete({
+        where: { id: containerId },
+
+    })
+    revalidatePath("/")
+    return deletedContainer
+}
+
+
