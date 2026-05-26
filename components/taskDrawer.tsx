@@ -48,8 +48,8 @@ export function TaskDrawer({ children, task, projectMembers }: { children: React
     React.useEffect(() => {
         if (goal === 100 && prevGoalRef.current !== 100) {
             confetti({
-                particleCount: 100,
-                spread: 70,
+                particleCount: 300,
+                spread: 200,
                 origin: { y: 0.6 },
             })
         }
