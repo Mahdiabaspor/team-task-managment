@@ -3,21 +3,14 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
+import { sessionCheck } from "./session-cheker"
 
 export async function createProject(name: string) {
 
     if (!name || name.trim() === "") {
         throw new Error("Project name cannot be empty")
-
     }
-    const session = await auth()
-    const userId = session?.user?.id as string | undefined
-
-    if (!userId) {
-        throw new Error("Unauthorized")
-    }
-
-
+    const userId = await sessionCheck()
 
     const result = await prisma.$transaction(async (tx) => {
 
@@ -25,6 +18,13 @@ export async function createProject(name: string) {
             data: {
                 name: name.trim(),
                 ownerId: userId,
+                containers:{
+                    createMany:{data:[
+                        {order:1,title:"Todo"},
+                        {order:2,title:"In Progress"},
+                        {order:3,title:"Finished"},
+                    ]}
+                }
             },
         })
 
@@ -39,6 +39,37 @@ export async function createProject(name: string) {
 
 
 
+        return project
+    })
+
+    revalidatePath("/")
+    return result
+}
+
+export async function deleteProject(projectId: string) {
+
+    const userId = await sessionCheck()
+
+    const result = await prisma.$transaction(async (tx) => {
+        const project = await tx.project.findUnique({
+            where: {
+                id: projectId,
+            },
+        })
+
+        if (!project) {
+            throw new Error("Project not found")
+        }
+
+        if (project.ownerId !== userId) {
+            throw new Error("Unauthorized")
+        }
+
+        await tx.project.delete({
+            where: {
+                id: projectId,
+            },
+        })
         return project
     })
 
