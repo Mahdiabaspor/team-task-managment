@@ -46,7 +46,7 @@ export async function createTask(
     },
   })
 
-  revalidatePath("/")
+  revalidatePath("/dashboard/projects")
   return task
 }
 
@@ -70,7 +70,7 @@ export async function moveTask(taskId: string, containerId: string) {
       containerId: containerId
     }
   })
-  revalidatePath("/")
+  revalidatePath("/dashboard/projects")
   return EditedTask
 
 }
@@ -88,7 +88,7 @@ export async function editTask(taskId: string, payload: Task) {
         where: { id: taskId },
         data: payload
     })
-    revalidatePath("/")
+    revalidatePath("/dashboard/projects")
     return editedTask
 }
 
@@ -102,7 +102,7 @@ export async function deleteTask(TaskId: string) {
         where: { id: TaskId },
 
     })
-    revalidatePath("/")
+    revalidatePath("/dashboard/projects")
     return deletedTask
 }
 

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DragDropProvider } from "@dnd-kit/react";
 import { Plus } from "lucide-react";
-import { useEffect, useOptimistic, useState, startTransition } from "react";
+import { useEffect, useState, startTransition } from "react";
 
 export interface IProject {
     // ... (Your interface remains the same)
@@ -35,14 +35,6 @@ function DragDropContainer({ project: initialProject }: { project: IProject }) {
     const [project, setProject] = useState<IProject>(initialProject);
     const [taskAddingContainer, setTaskAddingContainer] = useState("");
     const [taskName, setTaskName] = useState("");
-
-
-    const [OptimisticProject, addOptimisticUpdate] = useOptimistic(project,
-        (currentState, actionPayload: { draggedTask: any, targetContainerId: string }) => {
-            // منطق جابجایی را اینجا پیاده می‌کنیم
-            return moveTaskLogic(currentState, actionPayload.draggedTask, actionPayload.targetContainerId);
-        }
-    )
 
 
     function moveTaskLogic(currentProj: IProject, draggedTask: any, targetContainerId: string) {
@@ -105,31 +97,25 @@ function DragDropContainer({ project: initialProject }: { project: IProject }) {
                 // If dropped in the same container, do nothing
                 if (draggedTask.containerId === targetContainerId) return;
 
+                // Update UI optimistically
+                const updatedProject = moveTaskLogic(project, draggedTask, targetContainerId);
+                setProject(updatedProject);
 
+                // Update server in background without using useOptimistic
                 startTransition(async () => {
-
-                    addOptimisticUpdate({ draggedTask, targetContainerId });
-
                     try {
-                        // await new Promise((resolve, reject) => setTimeout(resolve, 3000))
-
-                        // await new Promise((resolve, reject) => setTimeout(reject, 3000))
                         await moveTask(draggedTask.id, targetContainerId);
-                        console.log("updated")
-
-
-                        setProject((prev) => moveTaskLogic(prev, draggedTask, targetContainerId));
-
                     } catch (error) {
-                        console.error("failed to optimistic", error);
-
+                        console.error("failed to move task", error);
+                        // Revert on error
+                        setProject(project);
                     }
                 });
 
             }}
         >
             <div className="flex gap-4 p-4">
-                {OptimisticProject.containers.map((container) => (
+                {project.containers.map((container) => (
                     <div key={container.id} className="w-72 min-h-100 bg-gray-50 rounded-xl flex flex-col border">
                         <div className="bg-black p-3 w-full rounded-t-xl">
                             <h3 className="font-bold text-center text-white">{container.title}</h3>
