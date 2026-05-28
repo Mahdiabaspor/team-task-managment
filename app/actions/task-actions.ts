@@ -136,5 +136,18 @@ export async function editTaskFromForm(formData: FormData) {
 
   revalidatePath("/dashboard/projects")
 }
+export async function editTasksOrders(taskIds: { id: string; order: number }[]) {
+  await sessionCheck()
+  await prisma.$transaction(async (tx) => {
+    for (const { id, order } of taskIds) {
+      await tx.task.update({
+        where: { id },
+        data: {
+          order,
+        },
+      })
+    }
+  })
 
-
+  revalidatePath("/dashboard/projects")
+}

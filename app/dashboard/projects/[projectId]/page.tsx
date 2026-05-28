@@ -1,11 +1,11 @@
 
-import Draggable from '@/components/draggable';
-import Droppable from '@/components/droppable';
+import Draggable from '@/app/dashboard/projects/[projectId]/draggable';
+import Droppable from '@/app/dashboard/projects/[projectId]/droppable';
 import { NewContainerDialog } from '@/components/newContainer-dialog-alert'
 import { Button } from '@/components/ui/button'
 import { SelectSeparator } from '@/components/ui/select'
 import prisma from '@/lib/prisma'
-import { DragDropProvider } from '@dnd-kit/react';
+
 import { Folder, FolderArchive, Plus } from 'lucide-react'
 import DragDropContainer, { IProject } from './dragDropContainer';
 

@@ -64,3 +64,21 @@ export async function deleteContainer(containerId: string) {
 }
 
 
+
+
+export async function editContainersOrders(containerIds: {id: string, order: number}[],) {
+
+    await sessionCheck()
+    await prisma.$transaction(async (tx) => {
+        for (const {id, order} of containerIds) {
+            await tx.container.update({
+                where: { id: id },
+                data: {
+                    order: order,
+                }
+            })
+        }
+    })
+
+    revalidatePath("/")
+}

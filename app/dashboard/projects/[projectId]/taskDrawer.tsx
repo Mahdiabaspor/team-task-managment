@@ -109,8 +109,8 @@ export function TaskDrawer({ children, task, projectMembers }: { children: React
                         <DrawerTitle>Task Progress & Details</DrawerTitle>
                         <DrawerDescription>Set your task progress. and assignment </DrawerDescription>
                     </DrawerHeader>
-                    <div className=" w-full flex items-center justify-between">
-                        <div className="p-4 pb-0 w-1/3">
+                    <div className="w-full flex flex-col md:flex-row items-start gap-4">
+                        <div className="p-4 pb-0 w-full md:w-1/3 flex flex-col">
                             <div className="flex items-center justify-center space-x-2">
                                 <Button
                                     variant="outline"
@@ -141,7 +141,7 @@ export function TaskDrawer({ children, task, projectMembers }: { children: React
                                     <span className="sr-only">Increase</span>
                                 </Button>
                             </div>
-                            <div className="mt-3 h-[120px]">
+                            <div className="mt-3 h-[120px] w-full min-w-0">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={data}>
                                         <Bar dataKey="goal" fill="var(--chart-1)">
@@ -156,7 +156,7 @@ export function TaskDrawer({ children, task, projectMembers }: { children: React
                                 </ResponsiveContainer>
                             </div>
                         </div>
-                        <form ref={formRef} action={editTaskFromForm} className="p-4 w-2/3">
+                        <form ref={formRef} action={editTaskFromForm} className="p-4 w-full md:w-2/3">
                             <input type="hidden" name="id" value={task.id} />
                             <input type="hidden" name="progress" value={goal.toString()} />
                             <div className="space-y-3">
