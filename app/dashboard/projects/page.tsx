@@ -24,6 +24,17 @@ export default async function Home() {
       members: true,
     }
   })
+
+
+  const projectsMembers = await prisma.projectMember.findMany({
+    where: {
+      userId: session.user.id
+    },
+    include: {
+      project:{include:{members:true}}
+    }
+  })
+  const UserProjects = projectsMembers.map((p)=>p.project)
   return (
     <div className="h-screen flex flex-col items-center justify-center ">
       {
@@ -42,7 +53,7 @@ export default async function Home() {
           </>
         ) : (
           <div className="flex flex-wrap gap-5 px-10 items-start justify-center mt-17 h-full">
-            {projects.map((p) => (
+            {UserProjects.map((p) => (
               <CardImage key={p.id} project={p} membersCount={p.members.length} />
             ))}
           </div>

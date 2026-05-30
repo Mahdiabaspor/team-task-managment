@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/prisma"
 import { sessionCheck } from "./session-cheker"
+import { auth } from "@/auth"
+import { revalidatePath } from "next/cache"
 
 export async function findUserByEmail(email: string) {
     if (email.trim() === "") return null
@@ -46,4 +48,65 @@ export async function InviteUser(data: inviteProps) {
     })
 
     return invite
+}
+
+export async function getPendingInvitations() {
+    const userId = await sessionCheck()
+    if (!userId) return []
+
+    const invitations = await prisma.invitations.findMany({
+        where: {
+            userId: userId,
+        },
+        include: {
+            project: true,
+            invitedBy: true,
+        },
+    })
+
+    return invitations
+}
+
+export async function acceptInvitation(invitationId: string) {
+    const userId = await sessionCheck()
+    if (!userId) throw new Error("Not authenticated")
+
+    const invitation = await prisma.invitations.findUnique({
+        where: { id: invitationId },
+    })
+
+    if (!invitation) throw new Error("Invitation not found")
+    if (invitation.userId !== userId) throw new Error("Unauthorized")
+
+    await prisma.projectMember.create({
+        data: {
+            userId: invitation.userId,
+            projectId: invitation.projectId,
+            role: "MEMBER",
+        },
+    })
+
+    await prisma.invitations.delete({
+        where: { id: invitationId },
+    })
+    revalidatePath("/")
+    return true
+}
+
+export async function rejectInvitation(invitationId: string) {
+    const userId = await sessionCheck()
+    if (!userId) throw new Error("Not authenticated")
+
+    const invitation = await prisma.invitations.findUnique({
+        where: { id: invitationId },
+    })
+
+    if (!invitation) throw new Error("Invitation not found")
+    if (invitation.userId !== userId) throw new Error("Unauthorized")
+
+    await prisma.invitations.delete({
+        where: { id: invitationId },
+    })
+
+    return true
 }
