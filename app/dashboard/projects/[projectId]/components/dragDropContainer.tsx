@@ -116,6 +116,7 @@ function DragDropContainer({ project: initialProject }: { project: IProject }) {
                                                     <TaskDrawer
                                                         task={task}
                                                         projectMembers={project.members}
+                                                        projectId={project.id}
                                                     >
                                                         <div className="bg-white p-3 overflow-hidden rounded shadow-sm border border-gray-200 w-full hover:border-blue-500 cursor-grab active:cursor-grabbing relative">
                                                             <span
@@ -177,7 +178,7 @@ function DragDropContainer({ project: initialProject }: { project: IProject }) {
                                                     size="sm"
                                                     className="flex-1"
                                                     onClick={() => {
-                                                        addTask(taskName, setTaskName, setTaskAddingContainer, taskAddingContainer)
+                                                        addTask(project.id,taskName, setTaskName, setTaskAddingContainer, taskAddingContainer)
                                                     }}
                                                 >
                                                     Add

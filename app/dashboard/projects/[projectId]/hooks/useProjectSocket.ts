@@ -78,6 +78,74 @@ export function useProjectSocket(
       });
     };
 
+
+
+
+ // ---------------- CREATE ----------------
+    socket.on("task:created", (task: any) => {
+      setProject((prev) => ({
+        ...prev,
+        containers: prev.containers.map((c) =>
+          c.id === task.containerId
+            ? { ...c, tasks: [...c.tasks, task] }
+            : c
+        ),
+      }));
+    });
+
+    // ---------------- UPDATE ----------------
+    socket.on("task:updated", (task: any) => {
+      setProject((prev) => ({
+        ...prev,
+        containers: prev.containers.map((c) => ({
+          ...c,
+          tasks: c.tasks.map((t) =>
+            t.id === task.id ? { ...t, ...task } : t
+          ),
+        })),
+      }));
+    });
+
+    // ---------------- DELETE ----------------
+    socket.on("task:deleted", (task: any) => {
+      setProject((prev) => ({
+        ...prev,
+        containers: prev.containers.map((c) => ({
+          ...c,
+          tasks: c.tasks.filter((t) => t.id !== task.id),
+        })),
+      }));
+    });
+
+    // ---------------- MOVE ----------------
+    socket.on("task:moved", (task: any) => {
+      setProject((prev) => {
+        const containers = prev.containers.map((c) => {
+          // remove from all containers
+          const filteredTasks = c.tasks.filter((t) => t.id !== task.id);
+
+          // add to new container
+          if (c.id === task.containerId) {
+            return {
+              ...c,
+              tasks: [...filteredTasks, task],
+            };
+          }
+
+          return {
+            ...c,
+            tasks: filteredTasks,
+          };
+        });
+
+        return { ...prev, containers };
+      });
+    });
+
+
+
+
+
     // -------------------------
     // SOCKET EVENTS
     // -------------------------
@@ -90,6 +158,14 @@ export function useProjectSocket(
     return () => {
       socket.off("containers-order-changed", handleContainersOrder);
       socket.off("container-single-action", handleContainerAction);
+
+
+
+  socket.off("task:created");
+      socket.off("task:updated");
+      socket.off("task:deleted");
+      socket.off("task:moved");
+
 
       socket.emit("leave-room", projectIdRef.current);
     };

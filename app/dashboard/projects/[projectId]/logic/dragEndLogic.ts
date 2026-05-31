@@ -43,7 +43,7 @@ export const DragEndLogic = (event:DragEndEvent,project:IProject,setProject: Dis
 
         startTransition(async () => {
             try {
-                await moveTask(draggedTask.id, targetTaskContainerId);
+                await moveTask(draggedTask.id, targetTaskContainerId,project.id);
             } catch (error) {
                 console.error(error);
                 setProject(project);

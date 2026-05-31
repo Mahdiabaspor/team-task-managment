@@ -4,13 +4,15 @@ import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { sessionCheck } from "./session-cheker"
 import { Task } from "../generated/prisma/client"
+import { socket } from "@/lib/socket"
 
 export async function createTask(
+  projectId : string ,
   title: string,
   containerId: string,
   description: string = "",
   assignedId?: string,
-  progress: number = 0
+  progress: number = 0,
 ) {
   if (!title || title.trim() === "") {
     throw new Error("Task title cannot be empty")
@@ -47,14 +49,17 @@ export async function createTask(
       progress,
     },
   })
-
+  socket.emit(
+    "task:created",
+    JSON.stringify({ ...task, projectId })
+  );
   revalidatePath("/dashboard/projects")
   return task
 }
 
 
 
-export async function moveTask(taskId: string, containerId: string) {
+export async function moveTask(taskId: string, containerId: string,projectId:string) {
   const userId = await sessionCheck()
   if (!taskId || !containerId) {
     throw new Error("influents data")
@@ -72,6 +77,13 @@ export async function moveTask(taskId: string, containerId: string) {
       containerId: containerId
     }
   })
+    socket.emit(
+    "task:moved",
+    JSON.stringify({
+      ...EditedTask,
+      projectId,
+    })
+  );
   revalidatePath("/dashboard/projects")
   return EditedTask
 
@@ -80,35 +92,27 @@ export async function moveTask(taskId: string, containerId: string) {
 
 
 
-export async function editTask(taskId: string, payload: Task) {
-    if (!taskId) {
-        throw new Error("Task title cannot be empty")
 
-    }
-    await sessionCheck()
-    const editedTask = await prisma.task.update({
-        where: { id: taskId },
-        data: payload
-    })
-    revalidatePath("/dashboard/projects")
-    return editedTask
+
+export async function deleteTask(TaskId: string,projectId:string) {
+  if (!TaskId) {
+    throw new Error("Task id cannot be empty")
+  }
+  await sessionCheck()
+  const deletedTask = await prisma.task.delete({
+    where: { id: TaskId },
+
+  })
+    socket.emit(
+    "task:deleted",
+    JSON.stringify({ ...deletedTask, projectId })
+  );
+
+  revalidatePath("/dashboard/projects")
+  return deletedTask
 }
 
-
-export async function deleteTask(TaskId: string) {
-    if (!TaskId ) {
-        throw new Error("Task id cannot be empty")
-    }
-    await sessionCheck()
-    const deletedTask = await prisma.task.delete({
-        where: { id: TaskId },
-
-    })
-    revalidatePath("/dashboard/projects")
-    return deletedTask
-}
-
-export async function editTaskFromForm(formData: FormData) {
+export async function editTaskFromForm(formData: FormData,projectId:string) {
   const userId = await sessionCheck()
 
   const id = formData.get("id")?.toString()
@@ -124,7 +128,7 @@ export async function editTaskFromForm(formData: FormData) {
   const existing = await prisma.task.findUnique({ where: { id } })
   if (!existing) throw new Error("Task not found")
 
-  await prisma.task.update({
+  const updatedTask = await prisma.task.update({
     where: { id },
     data: {
       title: title.trim(),
@@ -133,6 +137,12 @@ export async function editTaskFromForm(formData: FormData) {
       progress: Math.max(0, Math.min(100, progress)),
     },
   })
+
+  socket.emit(
+    "task:updated",
+    JSON.stringify({ ...updatedTask, projectId: projectId })
+  );
+
 
   revalidatePath("/dashboard/projects")
 }

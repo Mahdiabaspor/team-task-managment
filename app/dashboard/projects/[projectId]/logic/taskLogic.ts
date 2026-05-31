@@ -79,9 +79,9 @@ import { Dispatch, SetStateAction } from "react";
 
 
 
-      export  const addTask = async (taskName:string,setTaskName: (value: SetStateAction<string>) => void,setTaskAddingContainer: (value: SetStateAction<string>,) => void,taskAddingContainer:string) => {
+      export  const addTask = async (projectId:string, taskName:string,setTaskName: (value: SetStateAction<string>) => void,setTaskAddingContainer: (value: SetStateAction<string>,) => void,taskAddingContainer:string) => {
             if (!taskName) return;
-            await createTask(taskName, taskAddingContainer);
+            await createTask(projectId,taskName, taskAddingContainer);
             setTaskName("");
             setTaskAddingContainer("");
         };

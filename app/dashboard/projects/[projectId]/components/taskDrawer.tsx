@@ -34,7 +34,7 @@ const data = [
     { goal: 100 },
 ]
 
-export function TaskDrawer({ children, task, projectMembers }: { children: React.ReactNode, task: Task, projectMembers: IProject["members"] }) {
+export function TaskDrawer({ children, task, projectMembers,projectId }: { children: React.ReactNode, task: Task, projectMembers: IProject["members"],projectId:string }) {
     const [goal, setGoal] = React.useState(task.progress ?? 0)
     const [title, setTitle] = React.useState(task.title)
     const [description, setDescription] = React.useState(task.description)
@@ -82,7 +82,7 @@ export function TaskDrawer({ children, task, projectMembers }: { children: React
             if (formRef.current) {
                 await new Promise((resolve, reject) => {
                     const formData = new FormData(formRef.current!)
-                    editTaskFromForm(formData)
+                    editTaskFromForm(formData,projectId)
                         .then(resolve)
                         .catch((err) => {
                             setError(err.message || "Failed to update task")
@@ -156,7 +156,7 @@ export function TaskDrawer({ children, task, projectMembers }: { children: React
                                 </ResponsiveContainer>
                             </div>
                         </div>
-                        <form ref={formRef} action={editTaskFromForm} className="p-4 w-full md:w-2/3">
+                        <form ref={formRef}  className="p-4 w-full md:w-2/3">
                             <input type="hidden" name="id" value={task.id} />
                             <input type="hidden" name="progress" value={goal.toString()} />
                             <div className="space-y-3">
