@@ -33,6 +33,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useSession } from "next-auth/react"
+import { socket } from "@/lib/socket"
 
 const data = {
   user: {

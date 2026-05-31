@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/drawer"
 import { ProjectMember, Task } from "@/app/generated/prisma/client"
 import { editTaskFromForm } from "@/app/actions/task-actions"
-import { IProject } from "@/app/dashboard/projects/[projectId]/dragDropContainer"
+import { IProject } from "@/app/dashboard/projects/[projectId]/components/dragDropContainer"
 
 const data = [
     { goal: 0 },

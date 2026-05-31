@@ -1,14 +1,16 @@
 
-import Draggable from '@/app/dashboard/projects/[projectId]/draggable';
-import Droppable from '@/app/dashboard/projects/[projectId]/droppable';
+import Draggable from '@/app/dashboard/projects/[projectId]/components/draggable';
+import Droppable from '@/app/dashboard/projects/[projectId]/components/droppable';
 import { NewContainerDialog } from '@/components/newContainer-dialog-alert'
 import { Button } from '@/components/ui/button'
 import { SelectSeparator } from '@/components/ui/select'
 import prisma from '@/lib/prisma'
 
 import { Folder, FolderArchive, Plus } from 'lucide-react'
-import DragDropContainer, { IProject } from './dragDropContainer';
+import DragDropContainer, { IProject } from './components/dragDropContainer';
 import { InviteMemberDialog } from '@/components/invite-dialog-alert';
+// import RoomProvider from './room';
+import { socket } from '@/lib/socket';
 
 async function page({
   params,
@@ -41,8 +43,10 @@ async function page({
 
 
 
+
   return (
     <div className='h-full w-full p-6' >
+      {/* <RoomProvider projectId={projectId} /> */}
       <div className='flex items-center justify-between'>
         <div className='text-2xl font-bold flex items-center justify-start gap-3'>
           <FolderArchive className='size-7!' />
