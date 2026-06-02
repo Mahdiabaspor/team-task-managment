@@ -1,0 +1,28 @@
+{
+  "name": "real-time-socket",
+  "version": "1.0.0",
+  "description": "Real-time socket server for task management",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "watch": "tsc --watch"
+  },
+  "keywords": [
+    "socket.io",
+    "real-time",
+    "tasks"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io": "^4.7.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.1"
+  }
+}
