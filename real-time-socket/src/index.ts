@@ -38,7 +38,8 @@ const activeRooms = new Map<string, Set<string>>();
 // SOCKET CONNECTION
 // ==========================================
 io.on("connection", (socket: Socket) => {
-  console.log(`User connected: ${socket.id}`);
+  console.log(`\n👤 User connected: ${socket.id}`);
+  console.log(`📊 Total connected users: ${io.engine.clientsCount}`);
 
   // ==========================================
   // ROOM MANAGEMENT
@@ -99,12 +100,14 @@ io.on("connection", (socket: Socket) => {
       container: ContainerAction,
       type: "ADD" | "EDIT" | "DELETE"
     ) => {
-      console.log(
-        `Container ${type} action in ${projectId}:`,
-        container
-      );
+      // console.log(
+      //   `\n📦 Container ${type} received in ${projectId} from ${socket.id}:`,
+      //   container.id
+      // );
 
       // Broadcast to all users in the room
+      // const usersInRoom = io.sockets.adapter.rooms.get(projectId)?.size || 0;
+      // console.log(`📢 Broadcasting to ${usersInRoom} users in room ${projectId}`);
       io.to(projectId).emit("container-single-action", JSON.stringify(container), type);
     }
   );
@@ -115,25 +118,25 @@ io.on("connection", (socket: Socket) => {
 
   // Task created
   socket.on("task-created", (projectId: string, task: ITask) => {
-    console.log(`Task created in ${projectId}:`, task);
-
-    // Broadcast to all users in the room
+    // console.log(`\n✅ Task created in ${projectId} from ${socket.id}: ${task.id}`);
+    // const usersInRoom = io.sockets.adapter.rooms.get(projectId)?.size || 0;
+    // console.log(`📢 Broadcasting to ${usersInRoom} users in room ${projectId}`);
     io.to(projectId).emit("task:created", task);
   });
 
   // Task updated
   socket.on("task-updated", (projectId: string, task: TaskUpdate) => {
-    console.log(`Task updated in ${projectId}:`, task);
-
-    // Broadcast to all users in the room
+    // console.log(`\n📝 Task updated in ${projectId} from ${socket.id}: ${task.id}`);
+    // const usersInRoom = io.sockets.adapter.rooms.get(projectId)?.size || 0;
+    // console.log(`📢 Broadcasting to ${usersInRoom} users in room ${projectId}`);
     io.to(projectId).emit("task:updated", task);
   });
 
   // Task deleted
   socket.on("task-deleted", (projectId: string, taskId: string) => {
-    console.log(`Task deleted in ${projectId}:`, taskId);
-
-    // Broadcast to all users in the room
+    // console.log(`\n🗑️ Task deleted in ${projectId} from ${socket.id}: ${taskId}`);
+    // const usersInRoom = io.sockets.adapter.rooms.get(projectId)?.size || 0;
+    // console.log(`📢 Broadcasting to ${usersInRoom} users in room ${projectId}`);
     io.to(projectId).emit("task:deleted", { id: taskId });
   });
 
@@ -141,9 +144,9 @@ io.on("connection", (socket: Socket) => {
   socket.on(
     "task-moved",
     (projectId: string, task: ITask) => {
-      console.log(`Task moved in ${projectId}:`, task);
-
-      // Broadcast to all users in the room
+      // console.log(`\n➡️ Task moved in ${projectId} from ${socket.id}: ${task.id}`);
+      // const usersInRoom = io.sockets.adapter.rooms.get(projectId)?.size || 0;
+      // console.log(`📢 Broadcasting to ${usersInRoom} users in room ${projectId}`);
       io.to(projectId).emit("task:moved", task);
     }
   );
@@ -177,9 +180,7 @@ io.on("connection", (socket: Socket) => {
 // ==========================================
 // SERVER SETUP
 // ==========================================
-app.get("/health", (req, res) => {
-  res.json({ status: "Socket server is running" });
-});
+
 
 const PORT = process.env.PORT || 3001;
 

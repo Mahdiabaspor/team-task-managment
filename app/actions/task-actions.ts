@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { sessionCheck } from "./session-cheker"
 import { Task } from "../generated/prisma/client"
-import { socket } from "@/lib/socket"
+import { safeSocketEmit } from "@/lib/socket"
 
 export async function createTask(
   projectId : string ,
@@ -49,10 +49,7 @@ export async function createTask(
       progress,
     },
   })
-  socket.emit(
-    "task:created",
-    JSON.stringify({ ...task, projectId })
-  );
+  safeSocketEmit("task-created", projectId, task);
   revalidatePath("/dashboard/projects")
   return task
 }
@@ -77,13 +74,7 @@ export async function moveTask(taskId: string, containerId: string,projectId:str
       containerId: containerId
     }
   })
-    socket.emit(
-    "task:moved",
-    JSON.stringify({
-      ...EditedTask,
-      projectId,
-    })
-  );
+  safeSocketEmit("task-moved", projectId, EditedTask);
   revalidatePath("/dashboard/projects")
   return EditedTask
 
@@ -103,10 +94,7 @@ export async function deleteTask(TaskId: string,projectId:string) {
     where: { id: TaskId },
 
   })
-    socket.emit(
-    "task:deleted",
-    JSON.stringify({ ...deletedTask, projectId })
-  );
+  safeSocketEmit("task-deleted", projectId, TaskId);
 
   revalidatePath("/dashboard/projects")
   return deletedTask
@@ -138,11 +126,7 @@ export async function editTaskFromForm(formData: FormData,projectId:string) {
     },
   })
 
-  socket.emit(
-    "task:updated",
-    JSON.stringify({ ...updatedTask, projectId: projectId })
-  );
-
+  safeSocketEmit("task-updated", projectId, updatedTask);
 
   revalidatePath("/dashboard/projects")
 }

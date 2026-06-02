@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { sessionCheck } from "./session-cheker"
-import { socket } from "@/lib/socket"
+import { safeSocketEmit } from "@/lib/socket"
 
 export async function createContainer(name: string, projectId: string) {
 
@@ -25,9 +25,7 @@ export async function createContainer(name: string, projectId: string) {
         },
     })
 
-
-
-    socket.emit("container-single-action-socket", JSON.stringify(container), "ADD")
+    safeSocketEmit("container-action", projectId, container, "ADD")
     revalidatePath("/")
     return container
 }
@@ -40,13 +38,23 @@ export async function editContainerName(title: string, containerId: string) {
 
     }
     await sessionCheck()
+    
+    // Get container with projectId before updating
+    const container = await prisma.container.findUnique({
+        where: { id: containerId }
+    })
+    
+    if (!container) {
+        throw new Error("Container not found")
+    }
+    
     const editedContainer = await prisma.container.update({
         where: { id: containerId },
         data: {
             title: title
         }
     })
-    socket.emit("container-single-action-socket", JSON.stringify(editedContainer), "EDIT")
+    safeSocketEmit("container-action", container.projectId, editedContainer, "EDIT")
     revalidatePath("/")
     return editedContainer
 }
@@ -57,19 +65,29 @@ export async function deleteContainer(containerId: string) {
         throw new Error("Container id cannot be empty")
     }
     await sessionCheck()
+    
+    // Get container with projectId before deleting
+    const container = await prisma.container.findUnique({
+        where: { id: containerId }
+    })
+    
+    if (!container) {
+        throw new Error("Container not found")
+    }
+    
     const deletedContainer = await prisma.container.delete({
         where: { id: containerId },
 
     })
     revalidatePath("/")
-    socket.emit("container-single-action-socket", JSON.stringify(deletedContainer), "DELETE")
+    safeSocketEmit("container-action", container.projectId, deletedContainer, "DELETE")
     return deletedContainer
 }
 
 
 
 
-export async function editContainersOrders(containerIds: { id: string, order: number }[],) {
+export async function editContainersOrders(containerIds: { id: string, order: number }[],projectId:string) {
 
     await sessionCheck()
     const result = await prisma.$transaction(async (tx) => {
@@ -86,7 +104,7 @@ export async function editContainersOrders(containerIds: { id: string, order: nu
         return containers
     })
     if (result && result.length !== 0) {
-        socket.emit("change-containers-order", JSON.stringify(result))
+        safeSocketEmit("container-order-changed", result[0].projectId, result)
     }
     revalidatePath("/")
 }
