@@ -20,21 +20,21 @@ export async function findUserByEmail(email: string) {
 interface inviteProps {
     userId: string;
     projectId: string;
-    invitedById: string
+    invitedById: string;
+    role?: string;
 }
 export async function InviteUser(data: inviteProps) {
     await sessionCheck()
-    if (!data.invitedById) return
+    if (!data.invitedById) {
+        throw new Error("Invalid request")
+    }
 
     const inviteExist = await prisma.invitations.findFirst({
         where: {
-
             projectId: data.projectId,
             userId: data.userId,
             invitedById: data.invitedById
-
         }
-
     })
     if(inviteExist){
         throw new Error("this user is already Invited")

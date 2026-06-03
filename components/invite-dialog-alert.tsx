@@ -28,9 +28,11 @@ export function InviteMemberDialog({ projectId }: { projectId: string }) {
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
   const [foundedUser, setFoundedUser] = useState<any>(undefined)
   const [SubmittedEmail, setSubmittedEmail] = useState("")
   const [selectedRole, setSelected] = useState("MEMBER")
+  const [isOpen, setIsOpen] = useState(false)
   const session = useSession()
 
   // const handleMakeProject = async () => {
@@ -66,31 +68,60 @@ export function InviteMemberDialog({ projectId }: { projectId: string }) {
   const invitePlayer = async () => {
     setError(null)
     setLoading(true)
-    if (!session.data?.user) return
-    const invitedBy = session.data.user.id
-    if (!projectId) return
-    if (!invitedBy) return
-
-
-
-
-    await InviteUser({
-      invitedById: invitedBy,
-      projectId: projectId,
-      userId: foundedUser.id
-    }).catch(err => {
-      setError(err.message)
+    
+    if (!session.data?.user) {
+      setError("Not authenticated")
       setLoading(false)
-    })
+      return
+    }
+    
+    const invitedBy = session.data.user.id
+    if (!projectId) {
+      setError("Project not found")
+      setLoading(false)
+      return
+    }
+    if (!invitedBy) {
+      setError("User not found")
+      setLoading(false)
+      return
+    }
+
+    try {
+      const result = await InviteUser({
+        invitedById: invitedBy,
+        projectId: projectId,
+        userId: foundedUser.id,
+        role: selectedRole
+      })
+      
+      setLoading(false)
+      setSuccess(true)
+      
+      // Close dialog after short delay to show success
+      setTimeout(() => {
+        setEmail("")
+        setError(null)
+        setSuccess(false)
+        setFoundedUser(undefined)
+        setSelected("MEMBER")
+        setIsOpen(false)
+      }, 1000)
+    } catch (err: any) {
+      setError(err.message || "Failed to invite user")
+      setLoading(false)
+    }
   }
 
 
 
   return (
-    <AlertDialog onOpenChange={(open) => {
+    <AlertDialog open={isOpen} onOpenChange={(open) => {
+      setIsOpen(open)
       if (!open) {
         setEmail("")
         setError(null)
+        setSuccess(false)
         setFoundedUser(undefined)
         setSelected("MEMBER")
       }
@@ -115,11 +146,16 @@ export function InviteMemberDialog({ projectId }: { projectId: string }) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             type="email"
-            disabled={foundedUser}
+            disabled={foundedUser || loading}
           />
           {error && (
             <p className="text-sm text-red-500">
               {error}
+            </p>
+          )}
+          {success && (
+            <p className="text-sm text-green-600 font-medium">
+              ✓ Invitation sent successfully!
             </p>
           )}
           {foundedUser && (

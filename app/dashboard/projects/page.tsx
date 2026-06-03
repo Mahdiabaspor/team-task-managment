@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { NewProjectDialog } from "@/components/newProject-dialog-alert";
 import { CardImage } from "@/components/project-card";
 import { Button } from "@/components/ui/button";
+import { MemberAvatarsStack } from "@/components/member-avatars-stack";
 import prisma from "@/lib/prisma";
 import { Plus } from "lucide-react";
 
@@ -21,7 +22,7 @@ export default async function Home() {
       owner: { email: { equals: session.user.email } }
     },
     include: {
-      members: true,
+      members: { include: { user: true } },
     }
   })
 
@@ -31,7 +32,7 @@ export default async function Home() {
       userId: session.user.id
     },
     include: {
-      project:{include:{members:true}}
+      project:{include:{members:{include:{user:true}}}}
     }
   })
   const UserProjects = projectsMembers.map((p)=>p.project)
