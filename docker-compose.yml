@@ -35,7 +35,7 @@ services:
     build:
       context: ./web
       args:
-        DATABASE_URL: postgresql://postgres:postgres@postgres:5432/myFinalDb
+        DATABASE_URL_PROD: postgresql://postgres:postgres@postgres:5432/teamTaskManagementProdDb
         NEXT_PUBLIC_SOCKET_URL: http://localhost:3001
     container_name: web_frontend
     restart: always

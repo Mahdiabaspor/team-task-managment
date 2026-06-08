@@ -7,7 +7,10 @@ const globalForPrisma = global as unknown as {
 }
 
 function createPrismaClient() {
-  const connectionString = process.env.DATABASE_URL
+  let connectionString = process.env.DATABASE_URL
+  if (process.env.NODE_ENV === "production"){
+    connectionString = process.env.DATABASE_URL_PROD
+  }
   if (!connectionString) {
     throw new Error("DATABASE_URL is not set")
   }
