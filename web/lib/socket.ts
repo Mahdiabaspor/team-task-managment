@@ -1,6 +1,14 @@
 import { io } from "socket.io-client";
 
-export const socket = io("http://localhost:3001", {
+function getSocketUrl() {
+  if (typeof window !== "undefined") {
+    return process.env.NEXT_PUBLIC_SOCKET_URL ?? "http://localhost:3001";
+  }
+  return process.env.SOCKET_URL ?? "http://socket:3001";
+}
+
+export const socket = io(getSocketUrl(), {
+  autoConnect: false,
   reconnection: true,
   reconnectionDelay: 1000,
   reconnectionDelayMax: 5000,
@@ -8,29 +16,30 @@ export const socket = io("http://localhost:3001", {
   transports: ["websocket", "polling"],
 });
 
-socket.on("connect", () => {
-  console.log("✅ Socket connected to backend on port 3001");
-});
+if (typeof window !== "undefined") {
+  socket.on("connect", () => {
+    console.log("✅ Socket connected to backend on port 3001");
+  });
 
-socket.on("connect_error", (error) => {
-  console.error("❌ Socket connection error:", error);
-});
+  socket.on("connect_error", (error) => {
+    console.error("❌ Socket connection error:", error);
+  });
 
-socket.on("disconnect", (reason) => {
-  console.warn("⚠️ Socket disconnected:", reason);
-});
+  socket.on("disconnect", (reason) => {
+    console.warn("⚠️ Socket disconnected:", reason);
+  });
+}
 
-// Helper function to emit safely with connection check
 export const safeSocketEmit = (eventName: string, ...args: any[]) => {
+  if (!socket.connected) {
+    socket.connect();
+  }
+
   if (socket.connected) {
-    console.log(`📤 Emitting event: ${eventName}`, args);
     socket.emit(eventName, ...args);
   } else {
-    console.warn(`⚠️ Socket not connected, queuing event: ${eventName}`);
     socket.once("connect", () => {
-      console.log(`📤 Socket connected, now emitting queued event: ${eventName}`, args);
       socket.emit(eventName, ...args);
     });
   }
 };
-

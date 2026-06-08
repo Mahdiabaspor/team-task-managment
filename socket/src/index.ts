@@ -13,10 +13,20 @@ import {
 const app = express();
 const server = http.createServer(app);
 
+
+export const env = {
+  PORT: process.env.PORT || 3001,
+  CLIENT_URL:
+    process.env.WEB_URL ||
+    process.env.CLIENT_URL ||
+    "http://localhost:3000",
+  NODE_ENV: process.env.NODE_ENV || "development",
+};
+
 // Enable CORS
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: env.CLIENT_URL || "http://localhost:3000",
     methods: ["GET", "POST"],
     credentials: true,
   })
@@ -25,7 +35,7 @@ app.use(
 // Initialize Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: env.CLIENT_URL || "http://localhost:3000",
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -182,7 +192,7 @@ io.on("connection", (socket: Socket) => {
 // ==========================================
 
 
-const PORT = process.env.PORT || 3001;
+const PORT = env.PORT || 3001;
 
 server.listen(PORT, () => {
   console.log(`🚀 Socket.IO server running on http://localhost:${PORT}`);

@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: myFinalDb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d myFinalDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  socket:
+    build: ./socket
+    container_name: socket_server
+    restart: always
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./socket/.env
+    environment:
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./web
+      args:
+        DATABASE_URL: postgresql://postgres:postgres@postgres:5432/myFinalDb
+        NEXT_PUBLIC_SOCKET_URL: http://localhost:3001
+    container_name: web_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./web/.env
+    environment:
+      NODE_ENV: production
+      SOCKET_URL: http://socket:3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      socket:
+        condition: service_started
+
+volumes:
+  postgres_data:

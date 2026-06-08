@@ -1,0 +1,19 @@
+FROM node:20
+
+WORKDIR /app
+
+ARG DATABASE_URL
+ARG NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
+ENV DATABASE_URL=$DATABASE_URL
+ENV NEXT_PUBLIC_SOCKET_URL=$NEXT_PUBLIC_SOCKET_URL
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+RUN npx prisma generate
+RUN npm run build
+
+EXPOSE 3000
+
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
