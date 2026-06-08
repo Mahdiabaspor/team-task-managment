@@ -87,7 +87,7 @@ export async function deleteContainer(containerId: string) {
 
 
 
-export async function editContainersOrders(containerIds: { id: string, order: number }[],projectId:string) {
+export async function editContainersOrders(containerIds: { id: string, order: number }[]) {
 
     await sessionCheck()
     const result = await prisma.$transaction(async (tx) => {
