@@ -1,33 +1,26 @@
-# Web App (`todo-full`)
+# Web App
 
-This folder contains the **Next.js** frontend and backend (Server Actions, Prisma, NextAuth).
+Next.js frontend + Server Actions + Prisma + NextAuth.
 
-For full setup instructions — Docker, local development, environment variables, and troubleshooting — see the [**main README**](../README.md) in the project root.
+**Full documentation:** [main README](../README.md)
 
-## Quick reference
+## Quick start (local dev)
 
 ```bash
-# From this folder (web/)
+cp .env.example .env        # then add AUTH_SECRET + OAuth keys
 npm install
 npx prisma generate
 npx prisma migrate dev
-npm run dev        # http://localhost:3000
+npm run dev                 # http://localhost:3000
 ```
 
-Requires the **socket server** running separately on port `3001`. See the [main README](../README.md#run-locally-development).
+Also run the socket server — see [socket setup](../README.md#run-locally-development).
 
-## Key files
+## Database URLs
 
-| File | Purpose |
-|------|---------|
-| `auth.ts` | NextAuth configuration |
-| `middleware.ts` | Route protection |
-| `lib/prisma.ts` | Database client |
-| `lib/socket.ts` | Socket.IO client (browser + server) |
-| `prisma/schema.prisma` | Database schema |
-| `app/actions/` | Server actions for CRUD operations |
-| `dockerfile` | Production Docker image |
+| Variable | Use when |
+|----------|----------|
+| `DATABASE_URL` | `npm run dev` — host is `localhost` |
+| `DATABASE_URL_PROD` | `docker compose up` — host is `postgres` |
 
-## Environment
-
-Copy values into `web/.env` — see [Environment variables](../README.md#environment-variables) in the main README.
+See [`.env.example`](.env.example) for all variables.
